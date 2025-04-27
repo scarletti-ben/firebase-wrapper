@@ -7,8 +7,8 @@ The plan is to also add a `psuedo-api` at https://scarletti-ben.github.io/fireba
 
 > [!IMPORTANT]
 > - This project exposes a public api key for `Firebase`, which is used for identifying the `Firebase` you are connecting to, all security and authentication is handled via `Firestore` rules and `Google` authentication
-> - In production it is still best to avoid exposing "safe" public keys to the client. Whilst data should be safe behind server-side authentication checks, and user defined rules such as `Firestore` rules, it could still be used to make excess requests to your `Firebase` components, which could come at a cost
-> - This will be the only `Firebase` project that I will use in this manner, and it is connected to a free `Spark` tier account where it is impossible to incur costs
+> - It is probably best to avoid exposing even "safe" public keys to the client. Whilst data should be safe behind server-side authentication checks, and user defined rules such as `Firestore` rules, it is not impossible that it could be used to make excess requests to your `Firebase` components
+> - This `Firebase` project is connected to a free `Spark` tier account where it is impossible to incur costs
 
 # Aims
 The aims for the project are as follows
