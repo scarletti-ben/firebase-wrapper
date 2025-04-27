@@ -3,7 +3,13 @@ The primary aim of this repository is to create my own "wrapper" for `Firebase` 
 
 There will also be a `GitHub Pages` static site within this repository for testing the wrapper, you can access the site [here](https://scarletti-ben.github.io/firebase-wrapper/)
 
-The plan is to also add a `psuedo-api` at https://scarletti-ben.github.io/firebase-wrapper/api, which sites can use via an `iframe`, and is essentially publically exposed part of the `Firstore` database of `mainframe-storage` that allows limited `write` access
+The plan is to also add a `psuedo-api` at https://scarletti-ben.github.io/firebase-wrapper/api, which sites can use via an `iframe`, and is essentially publically exposed part of the `Firestore` database of `mainframe-storage` that allows limited `write` access
+
+> [!NOTE]
+> This project exposes a public api key for `Firebase`, which is used for identifying the `Firebase` you are connecting to, all security and authentication is handled via `Firestore` rules and `Google` authentication
+
+> [!IMPORTANT]
+> In production it is still best to avoid exposing this key to the client. Whilst data should be safe behind server-side authentication checks, and user defined rules such as `Firestore` rules, it could still be used to make excess requests to your `Firebase` components, which could come at a cost.
 
 # Aims
 The aims for the project are as follows
@@ -12,7 +18,7 @@ The aims for the project are as follows
 - An authenticated user should be able to read and write application data for the specific app they are currently using
 - The syntax of `firebase-wrapper.js` should be clear and concise and give easier access to common `Firebase` tools
 
-# Project Information
+# Usage 
 
 ## Using `firebase-wrapper.js`
 You can use the file locally or via `CDN`, in both cases you will want to define an app name. The reason for this is that `mainframe-storage` has its `Firestore` set up such that users have data for each app they use stored under `users/{userName}/apps/{appName}`, and the app name we define controls where data is stored and read from. Let us assume that we have `const appName = 'test-app'` for the snippets below
@@ -110,6 +116,45 @@ Below is a rough list what is exposed when importing `firebase-wrapper.js` corre
   - `firestore.deleteDocument(collectionName, documentName)`
   - `firestore.readCollection(collectionName)`
 
+# Miscellaneous
+
+## Project Notes
+- `firebase-wrapper.js` does not make authentication checks for you eg. for  `firestore.writeDocument`
+  - It is safe, and `Firestore` rules prevent unauthenticated writes, but it will throw errors and it is up to the developer to ensure user is logged in and authenticated
+
+## Setting Up Firebase
+You can create a new `Firebase` project, giving you access to the `Firebase Console` for your project. In the `Firebase Console` you can add apps to your project, the app itself doesn't necessarily need to exist but when you add an app to a `Firebase` project you generate a new `appId` that can be used alongside the public API key to interact with the components of your `Firebase` project. The `appId` itself isn't noticed by `Firestore` which is why we use a manually entered `appName` to separate collections under each user.
+
+You need to then enable `Authentication` [here](https://console.firebase.google.com/u/3/project/mainframe-storage/authentication), and choose `Google` as a sign-in provider, ignore the warnings for `SHA-1`
+
+You then enable / create a `Firestore` database and update the `Firestore` rules for read / write access
+
+Add `https://scarletti-ben.github.io/` to "authorised domains" if you want to access via a `GitHub Pages` static site
+
+You can use `Firebase` for hosting an app / site as well but this shows that it's not entirely necessary, you can host the site anywhere and you can still interface with a `Firestore` database, with authentication handled server-side by `Google`
+
+Linking an application to `Firebase` gives you the code similar to the snippet below, which we use in our `firebase-wrapper.js` file. It is important to note that the `apiKey` is is not meant to be a secret , it is entirely public as it identifies your `Firebase` project. Safety of data is entirely handled by `Google` authentication and user-defined `Firestore` rules.
+```javascript
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAx5VIksX5JeW2hk5FDf_8rhyBa6CibH84",
+    authDomain: "mainframe-storage.firebaseapp.com",
+    projectId: "mainframe-storage",
+    storageBucket: "mainframe-storage.firebasestorage.app",
+    messagingSenderId: "432631138940",
+    appId: "1:432631138940:web:ae5059b05db6b3e09317f9",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+```
+
+### Testing Firebase Locally
+By default `Firebase` only allows connections from whitelisted sites, this means that you may need to add a local URL to the whitelisted sites if it doesn't start with `localhost`, adding `http://127.0.0.1` to the whitelist will likely help
+
 ## Cloud Firestore Database
 A simplified version of the database structure can be seen below, with this structure a user can have data across multiple apps all stored within the same `Firestore` database, and accessed via the same credentials
 ```text
@@ -147,50 +192,9 @@ service cloud.firestore {
 }
 ```
 
-# Miscellaneous
-
-## Project Notes
-- `firebase-wrapper.js` does not make authentication checks for you eg. for  `firestore.writeDocument`
-  - It is safe, and `Firestore` rules prevent unauthenticated writes, but it will throw errors and it is up to the developer to ensure user is logged in and authenticated
-
-## Setting Up Firebase
-You can create a new `Firebase` project, giving you access to the `Firebase Console` for your project. In the `Firebase Console` you can add apps to your project, the app itself doesn't necessarily need to exist but when you add an app to a `Firebase` project you generate a new `appId` that can be used alongside the public API key to interact with the components of your `Firebase` project. The `appId` itself isn't noticed by `Firestore` which is why we use a manually entered `appName` to separate collections under each user.
-
-You need to then enable `Authentication` [here](https://console.firebase.google.com/u/3/project/mainframe-storage/authentication), and choose `Google` as a sign-in provider, ignore the warnings for `SHA-1`
-
-You then enable / create a `Firestore` database and update the `Firestore` rules for read / write access
-
-You can use `Firebase` for hosting an app / site as well but this shows that it's not entirely necessary, you can host the site anywhere and you can still interface with a `Firestore` database, with authentication handled server-side by `Google`
-
-Linking an application to `Firebase` gives you the code similar to the snippet below, which we use in our `firebase-wrapper.js` file. It is important to note that the `apiKey` is is not meant to be a secret , it is entirely public as it identifies your `Firebase` project. Safety of data is entirely handled by `Google` authentication and user-defined `Firestore` rules.
-```javascript
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyAx5VIksX5JeW2hk5FDf_8rhyBa6CibH84",
-    authDomain: "mainframe-storage.firebaseapp.com",
-    projectId: "mainframe-storage",
-    storageBucket: "mainframe-storage.firebasestorage.app",
-    messagingSenderId: "432631138940",
-    appId: "1:432631138940:web:ae5059b05db6b3e09317f9",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-```
-
-### Testing Firebase Locally
-By default `Firebase` only allows connections from whitelisted sites, this means that you may need to add a local URL to the whitelisted sites if it doesn't start with `localhost`, adding `http://127.0.0.1` to the whitelist will likely help
-
 ## Screenshots
 ![alt text](screenshots/screenshot001.png)
 ![alt text](screenshots/screenshot002.png)
-
-## Developement Environment Information
-- Tested using `Google Chrome Version 135.0.7049.96 (Official Build) (64-bit)`
-- Not tested on mobile devices or other desktop browsers
 
 # Learnings
 
@@ -201,7 +205,13 @@ To ensure you receive a refresh token, your request for authentication must incl
 
 The refresh token is managed automatically for you when using `Firebase` via `getAuth`, it will check if the current ID token is valid, then attempt to refresh it if not using the refresh token, rotating the ID token, and likely the refresh token itself in the process. In other apps where `Google OAuth 2.0` is used you may have to manage this manually.
 
-# Repository Metadata
+# Project Information
+
+## Developement Environment Information
+- Tested using `Google Chrome Version 135.0.7049.96 (Official Build) (64-bit)`
+- Not tested on mobile devices or other desktop browsers
+
+## Repository Metadata
 ```yaml
 ---
 metadata:
