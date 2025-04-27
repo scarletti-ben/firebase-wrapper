@@ -5,11 +5,10 @@ There will also be a `GitHub Pages` static site within this repository for testi
 
 The plan is to also add a `psuedo-api` at https://scarletti-ben.github.io/firebase-wrapper/api, which sites can use via an `iframe`, and is essentially publically exposed part of the `Firestore` database of `mainframe-storage` that allows limited `write` access
 
-> [!NOTE]
-> This project exposes a public api key for `Firebase`, which is used for identifying the `Firebase` you are connecting to, all security and authentication is handled via `Firestore` rules and `Google` authentication
-
 > [!IMPORTANT]
-> In production it is still best to avoid exposing this key to the client. Whilst data should be safe behind server-side authentication checks, and user defined rules such as `Firestore` rules, it could still be used to make excess requests to your `Firebase` components, which could come at a cost.
+> - This project exposes a public api key for `Firebase`, which is used for identifying the `Firebase` you are connecting to, all security and authentication is handled via `Firestore` rules and `Google` authentication
+> - In production it is still best to avoid exposing "safe" public keys to the client. Whilst data should be safe behind server-side authentication checks, and user defined rules such as `Firestore` rules, it could still be used to make excess requests to your `Firebase` components, which could come at a cost
+> - This will be the only `Firebase` project that I will use in this manner, and it is connected to a free `Spark` tier account where it is impossible to incur costs
 
 # Aims
 The aims for the project are as follows
