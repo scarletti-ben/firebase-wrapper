@@ -78,7 +78,8 @@ firestore.writeDocument('test-collection', documentData.uuid, documentData)
 > If you are adding `firebase-wrapper.js` to a different `GitHub` repository it may get flagged by `secret scanner` which looks for exposed API keys, to avoid this you can add a `secret_scanning.yml` [file](./secret_scanning.yml), that looks like the snippet below
 > ```yml
 > paths-ignore:
->   - "firebase-wrapper.js"```
+>   - "firebase-wrapper.js"
+> ```
 
 ### CDN Usage
 Whilst you can add the `CDN` link directly to the `<head>` of your `HTML` file, and automatically gain access to the exported objects, `initialisation`, `authentication`, and `firestore`. It is probably best practice to import within your `JavaScript` file, as seen below
