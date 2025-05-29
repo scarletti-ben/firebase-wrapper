@@ -4,11 +4,6 @@
 
 import { initialisation, authentication, firestore } from "./firebase-wrapper.js";
 
-import *  as firebase from "./firebase-wrapper.js";
-firebase.initialisation
-firebase.authentication
-firebase.firestore
-
 // < ========================================================
 // < HTML Queries
 // < ========================================================
@@ -16,22 +11,6 @@ firebase.firestore
 const noteContainer = document.getElementById('scrollable-content');
 const addNoteButton = document.getElementById('add-note-button');
 const userIcon = document.getElementById('user-icon');
-
-// ! ========================================================
-// ! Firebase Wrapper Initialisation and Aliasing
-// ! ========================================================
-
-// Initialise Firebase with app name
-initialisation.init('test-app');
-
-// Add example callbacks
-authentication.onLogin((user) => {
-    const profilePicture = user.photoURL;
-    console.log('User profile picture:', profilePicture);
-})
-authentication.onLogout(() => {
-    console.log('User logged out');
-})
 
 // < ========================================================
 // < Note Class - Connected Objects and HTML Elements
@@ -185,12 +164,33 @@ const notes = [];
 
 async function main() {
 
+    // > ====================================================
+    // > Firebase Initialisation 
+    // > ====================================================
+
+    // Initialise Firebase with app name
+    await initialisation.init('test-app');
+
+    // Add example callbacks
+    authentication.onLogin((user) => {
+        console.log('User profile picture:', user.photoURL);
+    })
+    authentication.onLogout(() => {
+        console.log('User logged out');
+    })
+
+    console.log(initialisation.core)
+
+    // > ====================================================
+    // > General Functionality 
+    // > ====================================================
+
     // Create Toolbar instance
     let toolbar = new Toolbar();
 
     toolbar.addButton('Login', async () => {
         let credentials = await authentication.login();
-        // console.log(credentials);
+        console.log(credentials);
     })
 
     toolbar.addButton('Logout', async () => {

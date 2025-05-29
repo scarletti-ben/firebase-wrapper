@@ -3,22 +3,29 @@ The primary aim of this repository is to create my own "wrapper" for `Firebase` 
 
 There will also be a `GitHub Pages` static site within this repository for testing the wrapper, you can access the site [here](https://scarletti-ben.github.io/firebase-wrapper/)
 
-The plan is to also add a `psuedo-api` at https://scarletti-ben.github.io/firebase-wrapper/api, which sites can use via an `iframe`, and is essentially publically exposed part of the `Firestore` database of `mainframe-storage` that allows limited `write` access
+# Security
+Previous versions of this project exposed a public API key for `Firebase` and, depsite the list of protections below it still feels wrong to expose any API key to the client
+- The official [quote](https://firebase.google.com/support/guides/security-checklist#:~:text=To%20store%20Firebase%20API%20keys,automatically%20acquire%20them%20during%20initialization) from `Firebase` on the matter suggests that `Firebase` API keys are not secret and can be safely embedded in code
+- There are server-side authentication checks via `Google oAuth 2.0`
+- There are database access rules set via `Firestore Rules`
+- This `Firebase` project is connected to a free `Spark` tier account where it is impossible to incur costs
 
-> [!IMPORTANT]
-> - This project exposes a public api key for `Firebase`, which is used for identifying the `Firebase` you are connecting to, all security and authentication is handled via `Firestore` rules and `Google` authentication
-> - It is probably best to avoid exposing even "safe" public keys to the client. Whilst data should be safe behind server-side authentication checks, and user defined rules such as `Firestore` rules, it is not impossible that it could be used to make excess requests to your `Firebase` components
-> - The official quote from `Firebase` on the matter can be found [here](https://firebase.google.com/support/guides/security-checklist#:~:text=To%20store%20Firebase%20API%20keys,automatically%20acquire%20them%20during%20initialization), and it states: "To store Firebase API keys (which are not secret), just embed them in code."
-> - This `Firebase` project is connected to a free `Spark` tier account where it is impossible to incur costs
+As such I decided it would be "fun" to encrypt `firebaseConfig` using `PBKDF2` / `AES-256` and store the object in the `objects.json` file, to be decrypted as needed. In this way the decrypted version can be stored client-side in `IndexedDB`. This is by no means a good method if the API key in question was truly a secret, but adds a layer of obfuscation through encryption. If `GitHub` secret scanner flags `objects.json` you can add a `secret_scanning.yaml` file to the repository as below
+```yaml
+paths-ignore:
+  - "objects.json"
+```
 
 # Aims
 The aims for the project are as follows
-- A user should be authenticated via `Sign in with Google`
+- The `firebaseConfig` object should be decrypted via a "pre-authorisation" phase, using `PBKDF2` and requiring the `password` and `salt` used to encrypt the original object
+  - The "pre-authorisation" phase should only be required on new devices, with `firebaseConfig` then stored to `IndexedDB` indefinitely
+- A user should be authenticated via `Sign in with Google` using `Google oAuth 2.0`
 - An authenticated user should be able to read and write their personal data
-- An authenticated user should be able to read and write application data for the specific app they are currently using
+- An authenticated user should be able to read and write personal application data for the specific app they are currently using
 - The syntax of `firebase-wrapper.js` should be clear and concise and give easier access to common `Firebase` tools
 
-# Usage 
+# Usage
 
 ## Using `firebase-wrapper.js`
 You can use the file locally or via `CDN`, in both cases you will want to define an app name. The reason for this is that `mainframe-storage` has its `Firestore` set up such that users have data for each app they use stored under `users/{userName}/apps/{appName}`, and the app name we define controls where data is stored and read from. Let us assume that we have `const appName = 'test-app'` for the snippets below
@@ -48,7 +55,7 @@ In the snippet below we use the first method, the snippet is not an exhaustive l
 import { initialisation, authentication, firestore } from "./firebase-wrapper.js";
 
 // Initialise Firebase with app name
-initialisation.init(appName);
+await initialisation.init(appName);
 
 // Add login functionality to an HTML button
 loginButtonElement.addEventListener('click', async () => {
@@ -74,12 +81,6 @@ authentication.onLogout(() => {
 // Write document at users/{userName}/apps/test-app/test-collection/{documentUUID}
 firestore.writeDocument('test-collection', documentData.uuid, documentData)
 ```
-> [!Note]
-> If you are adding `firebase-wrapper.js` to a different `GitHub` repository it may get flagged by `secret scanner` which looks for exposed API keys, to avoid this you can add a `secret_scanning.yml` [file](./secret_scanning.yml), that looks like the snippet below
-> ```yml
-> paths-ignore:
->   - "firebase-wrapper.js"
-> ```
 
 ### CDN Usage
 Whilst you can add the `CDN` link directly to the `<head>` of your `HTML` file, and automatically gain access to the exported objects, `initialisation`, `authentication`, and `firestore`. It is probably best practice to import within your `JavaScript` file, as seen below
@@ -95,7 +96,6 @@ import *  as firebase from 'https://scarletti-ben.github.io/firebase-wrapper/fir
 Once you have imported `firebase-wrapper.js` you can use it much the same as you would in a local environment, albeit with no code completion from your `IDE`
 
 #### CDN Links
-
 If you are accessing the file via a GitHub Pages link you can expect to be using the latest version of the file as they exist on the main branch of the repository
 - https://scarletti-ben.github.io/firebase-wrapper/firebase-wrapper.js
 
@@ -128,7 +128,7 @@ Below is a rough list what is exposed when importing `firebase-wrapper.js` corre
 - `firebase-wrapper.js` does not make authentication checks for you eg. for  `firestore.writeDocument`
   - It is safe, and `Firestore` rules prevent unauthenticated writes, but it will throw errors and it is up to the developer to ensure user is logged in and authenticated
 
-## Setting Up Firebase
+## Setting Up Firebase / Firestore
 You can create a new `Firebase` project, giving you access to the `Firebase Console` for your project. In the `Firebase Console` you can add apps to your project, the app itself doesn't necessarily need to exist but when you add an app to a `Firebase` project you generate a new `appId` that can be used alongside the public API key to interact with the components of your `Firebase` project. The `appId` itself isn't noticed by `Firestore` which is why we use a manually entered `appName` to separate collections under each user.
 
 You need to then enable `Authentication` [here](https://console.firebase.google.com/u/3/project/mainframe-storage/authentication), and choose `Google` as a sign-in provider, ignore the warnings for `SHA-1`
@@ -139,7 +139,7 @@ Add `https://scarletti-ben.github.io/` to "authorised domains" if you want to ac
 
 You can use `Firebase` for hosting an app / site as well but this shows that it's not entirely necessary, you can host the site anywhere and you can still interface with a `Firestore` database, with authentication handled server-side by `Google`
 
-Linking an application to `Firebase` gives you the code similar to the snippet below, which we use in our `firebase-wrapper.js` file. It is important to note that the `apiKey` is is not meant to be a secret , it is entirely public as it identifies your `Firebase` project. Safety of data is entirely handled by `Google` authentication and user-defined `Firestore` rules.
+Linking an application to `Firebase` gives you the code similar to the snippet below, which we have an encrypted version of within the `objects.json` file. It is important to note that the `apiKey` is is not meant to be a secret, it is entirely public as it identifies your `Firebase` project. Safety of data is primarily handled by `Google` authentication and manually defined `Firestore` rules.
 ```javascript
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -222,10 +222,11 @@ The refresh token is managed automatically for you when using `Firebase` via `ge
 ---
 metadata:
   author: "Ben Scarletti"
-  date: "2025-04-24"
-  description: ""
+  date-created: "2025-04-24"
+  date-modified: "2025-05-29"
+  description: "Firebase wrapper to be used as is, or repurposed for my future projects"
   tags: [
-    "dev", "webdev", "programming", "coding", "javascript", "html", "cdn", "ecma6", "export", "import", "firebase", "firestore", "firestore rules", "cloud firestore", "firebase cli", "authentication", "google oauth 2.0", "api", "api keys", "encryption", "pbkdf2", "https", "tokens", "refresh tokens", "id tokens", "sign in with google"
+    "dev", "webdev", "programming", "coding", "javascript", "html", "cdn", "ecma6", "export", "import", "firebase", "firestore", "firestore rules", "cloud firestore", "firebase cli", "database", "authentication", "google oauth 2.0", "api", "api keys", "encryption", "pbkdf2", "https", "tokens", "refresh tokens", "id tokens", "sign in with google", "encryption", "decryption", "pbkdf2", "obfuscation", "aes", "aes-256", "indexeddb"
   ]
 ---
 ```
