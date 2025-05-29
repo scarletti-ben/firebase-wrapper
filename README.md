@@ -4,7 +4,7 @@ The primary aim of this repository is to create my own "wrapper" for `Firebase` 
 There will also be a `GitHub Pages` static site within this repository for testing the wrapper, you can access the site [here](https://scarletti-ben.github.io/firebase-wrapper/)
 
 # Security
-Previous versions of this project exposed a public API key for `Firebase` and, depsite the list of protections below it still feels wrong to expose any API key to the client
+Previous versions of this project exposed a public API key for `Firebase` and, depsite the list of protections below it still feels wrong to expose any API key to the client, that being said I haven't deleted the repository so the raw API key is still very much accessible in previous versions
 - The official [quote](https://firebase.google.com/support/guides/security-checklist#:~:text=To%20store%20Firebase%20API%20keys,automatically%20acquire%20them%20during%20initialization) from `Firebase` on the matter suggests that `Firebase` API keys are not secret and can be safely embedded in code
 - There are server-side authentication checks via `Google oAuth 2.0`
 - There are database access rules set via `Firestore Rules`
