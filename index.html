@@ -2,51 +2,133 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Template</title>
-
-  <!-- ! Imports -->
-
-  <!-- ! Icon -->
-  <link rel="icon" type="image/png" href="icon.png" />
-
-  <!-- ! CSS -->
-  <link rel="stylesheet" href="styles.css" />
+  <title>Firenote</title>
+  <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
-
-  <!-- ! HTML -->
   <div id="page">
+    <div id="heading">
 
-    <div id="central-container">
-      <div id="central-header" class="central-row">
-        <p>Firestore Notes</p>
-        <div id="user-icon" title="login">
-          <svg width="16" height="16">
-            <circle cx="8" cy="8" r="8" fill="magenta" />
-          </svg>
+      <h1 id="site-title">Firenote</h1>
+
+      <div id="site-buttons">
+        <div id="decrypt-button" class="circle hidden">
+          <span class="icon" title="Decrypt Site">
+            <svg>
+              <use href="icons.svg?v=1#lock"></use>
+            </svg>
+          </span>
+        </div>
+
+        <div id="login-button" class="circle">
+          <span class="icon" title="Sign In">
+            <svg>
+              <use href="icons.svg?v=1#profile"></use>
+            </svg>
+          </span>
         </div>
       </div>
-      <div id="central-notches" class="central-row">
-        <div id="toolbar"></div>
-      </div>
-      <div id="central-content" class="central-row">
-        <div id="scrollable-content">
 
-          <div id="add-note-button">+</div>
+    </div>
+
+    <div id="main">
+
+      <div id="content-frame" class="frame hidden">
+
+        <div id="note-container" class="note-container">
+
+          <div class="note-section">
+
+            <div class="note-header">
+              <input type="text" class="note-title" placeholder="Note title..." data-field="title">
+            </div>
+
+          </div>
+
+          <div class="note-section">
+
+            <div class="note-body">
+              <textarea class="note-text" placeholder="Note text..." data-field="text"></textarea>
+            </div>
+
+          </div>
+
+          <div class="note-section">
+
+            <div class="note-tags">
+
+              <div class="input-container">
+
+                <div class="input-group">
+                  <label for="note-tags">Tags</label>
+                  <input type="text" class="tags-input" placeholder="coding, webdev, miscellaneous..."
+                    data-field="tags">
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="note-section">
+
+            <div class="note-metadata">
+
+              <div class="input-container">
+
+                <div class="input-group">
+                  <label for="input">Date</label>
+                  <input data-field="date" type="datetime-local" class="date-input">
+                  <!-- <input data-field="date" type="date" class="date-input"> -->
+                </div>
+
+              </div>
+
+              <div class="input-container">
+
+                <div class="input-group hidden">
+                  <label for="input">UUID</label>
+                  <input data-field="uuid" type="text" readonly>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="note-section">
+
+            <div class="note-actions">
+
+            </div>
+
+          </div>
 
         </div>
+
       </div>
+
+      <div id="error-frame" class="frame hidden">
+        <div id="error-message-container">
+          <div id="error-message">
+            <h2>Error Message</h2>
+            <p>This is where error messages appear when the error frame is visible</p>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div>
 
   <!-- ! JavaScript -->
-  <script defer type="module" src="main.js"></script>
+  <script src="script.js" type="module" defer></script>
 
 </body>
 
