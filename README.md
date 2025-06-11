@@ -1,3 +1,5 @@
+# README NEEDS REWORK DUE TO RECENT CHANGES
+
 # Overview
 The primary aim of this repository is to create my own "wrapper" for `Firebase` / `Cloud Firestore` API functionality. It is tailored for use with my `Firebase` project named `mainframe-storage` which is set up for `Firestore` database usage and `Google oAuth 2.0` authentication. I set up the `Firebase` project as a learning process but also intend to use it across many applications as the central database for user data.
 
